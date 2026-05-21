@@ -1,0 +1,206 @@
+/* Brand palette: Indigo-Violet (Option A). Chosen because the site combines
+   community + stock-discussion — indigo feels modern and tech-leaning without
+   overcommitting to bullish green or cautionary red. */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    /* Brand primary (indigo-500 #6366f1) */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 239 84% 67%;
+    --radius: 0.5rem;
+
+    /* Brand tokens */
+    --brand-50: 226 100% 97%;
+    --brand-100: 226 100% 94%;
+    --brand-200: 228 96% 89%;
+    --brand-300: 230 94% 82%;
+    --brand-400: 234 89% 74%;
+    --brand-500: 239 84% 67%; /* indigo-500 */
+    --brand-600: 243 75% 59%; /* indigo-600 */
+    --brand-700: 245 58% 51%;
+    --brand-accent-500: 258 90% 66%; /* violet-500 #8b5cf6 */
+    --brand-accent-600: 263 70% 50%; /* violet-600 */
+    --brand-gradient: linear-gradient(
+      135deg,
+      hsl(var(--brand-500)) 0%,
+      hsl(var(--brand-accent-500)) 100%
+    );
+    --brand-gradient-soft: linear-gradient(
+      135deg,
+      hsl(var(--brand-500) / 0.15) 0%,
+      hsl(var(--brand-accent-500) / 0.15) 100%
+    );
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    /* Slightly brighter in dark so it pops on black */
+    --primary: 239 90% 72%;
+    --primary-foreground: 240 10% 6%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 239 90% 72%;
+
+    --brand-50: 235 40% 14%;
+    --brand-100: 238 45% 20%;
+    --brand-200: 240 50% 28%;
+    --brand-300: 241 60% 38%;
+    --brand-400: 241 72% 52%;
+    --brand-500: 239 90% 72%;
+    --brand-600: 243 80% 66%;
+    --brand-700: 245 65% 58%;
+    --brand-accent-500: 258 92% 72%;
+    --brand-accent-600: 263 78% 60%;
+    --brand-gradient: linear-gradient(
+      135deg,
+      hsl(var(--brand-500)) 0%,
+      hsl(var(--brand-accent-500)) 100%
+    );
+    --brand-gradient-soft: linear-gradient(
+      135deg,
+      hsl(var(--brand-500) / 0.22) 0%,
+      hsl(var(--brand-accent-500) / 0.22) 100%
+    );
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC',
+      ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+}
+
+@layer utilities {
+  .bg-brand-gradient {
+    background-image: var(--brand-gradient);
+  }
+  .bg-brand-gradient-soft {
+    background-image: var(--brand-gradient-soft);
+  }
+  .text-brand-gradient {
+    background-image: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .ring-brand {
+    --tw-ring-color: hsl(var(--brand-500) / 0.5);
+  }
+}
+
+/* prose-post — 中文阅读流优化的正文样式 */
+@layer components {
+  .prose-post {
+    @apply text-[1rem] leading-[1.8] text-foreground/90;
+  }
+  .prose-post > * + * {
+    margin-top: 1.1em;
+  }
+  .prose-post p {
+    @apply leading-[1.8];
+  }
+  .prose-post h1 {
+    @apply mt-8 text-h2 font-semibold tracking-tight;
+  }
+  .prose-post h2 {
+    @apply mt-7 text-h3 font-semibold tracking-tight;
+  }
+  .prose-post h3 {
+    @apply mt-6 text-[1.0625rem] font-semibold tracking-tight;
+  }
+  .prose-post ul,
+  .prose-post ol {
+    @apply pl-6;
+  }
+  .prose-post ul {
+    list-style: disc;
+  }
+  .prose-post ol {
+    list-style: decimal;
+  }
+  .prose-post li + li {
+    margin-top: 0.35em;
+  }
+  .prose-post blockquote {
+    @apply border-l-2 border-[hsl(var(--brand-500))] pl-4 text-muted-foreground;
+  }
+  .prose-post code {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em];
+  }
+  .prose-post pre {
+    @apply overflow-x-auto rounded-lg border border-border/60 bg-muted/40 p-4 text-sm;
+  }
+  .prose-post a {
+    @apply text-[hsl(var(--brand-600))] underline-offset-4 hover:underline dark:text-[hsl(var(--brand-400))];
+  }
+  .prose-post img {
+    @apply rounded-lg border border-border/60;
+  }
+  .prose-post hr {
+    @apply my-8 border-border/60;
+  }
+}
+
+/*
+ * 全局 reduced-motion 兜底 ——
+ * useReducedMotion hook 只覆盖 React 组件级动画（framer-motion / 自定义动效），
+ * 对纯 CSS 动画（animate-spin / animate-pulse / @keyframes / transition）触达不到。
+ * 这里强制把 animation/transition 缩到 0.01ms（保留终态而非 0ms 是为了让
+ * 依赖 onAnimationEnd / transitionend 事件的逻辑仍能触发）。
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

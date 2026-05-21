@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/ASUS/.claude/projects/**)",
+      "Read(//c/Users/ASUS/.claude/projects/D--/**)",
+      "Bash(gh auth *)",
+      "Bash(gh search *)",
+      "Bash(gh api *)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm run *)",
+      "WebSearch"
+    ]
+  }
+}
