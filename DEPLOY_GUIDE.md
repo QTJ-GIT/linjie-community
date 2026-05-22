@@ -121,14 +121,12 @@ git push origin main
 
 推送后等 1-2 分钟，刷新 `https://linjie.app` 即可看到更新。
 
-### 5.3 同时推送到 CNB 备份
-```bash
-# 推送到 GitHub（主部署）
-git push origin main
+### 5.3 自动同步到 CNB（已配置）
 
-# 推送到 CNB（国内备份）
-git push cnb main
-```
+**本地推送**：`git push origin main` 会自动同时推送到 **GitHub + CNB**（已配置双 push URL）
+
+**GitHub Actions 备用同步**：如果本地没推 CNB，GitHub 也会自动同步到 CNB
+- 需要在 GitHub Secrets 中配置 `CNB_TOKEN`（可选，本地双 push 已足够）
 
 ---
 
@@ -161,8 +159,17 @@ Vercel 会自动为 `linjie.app` 申请和续期 SSL 证书，无需手动操作
 - **已执行的 Migrations**：0016 ~ 0018（教学大厅相关）
 - **完整表列表**：profiles, posts, comments, likes, bookmarks, teaching_resources, teaching_likes, teaching_bookmarks, teaching_comments, chat_messages, chat_rooms, tickers 等
 
-### 7.2 添加新的数据库字段
-如需给 `teaching_resources` 或其他表添加字段：
+### 7.2 执行数据库迁移（自动化脚本）
+
+已配置脚本 `scripts/apply-migrations.js`，可自动执行所有迁移：
+
+```bash
+# 1. 确保 .env.local 中有 SUPABASE_ACCESS_TOKEN
+# 2. 执行迁移
+node scripts/apply-migrations.js
+```
+
+**手动执行单条迁移**：
 1. 在 `supabase/migrations/` 下新建 SQL 文件（如 `0019_new_feature.sql`）
 2. 在 Supabase Dashboard → SQL Editor 中执行
 3. 同时在本地 models/types 中同步类型定义

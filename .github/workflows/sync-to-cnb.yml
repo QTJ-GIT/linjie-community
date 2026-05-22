@@ -1,0 +1,25 @@
+# 自动同步：GitHub → CNB
+# 当代码推送到 GitHub 的 main 分支时，自动同步到 CNB 仓库
+name: Sync to CNB
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to CNB
+        env:
+          CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
+        run: |
+          git remote add cnb https://cnb.cool/FRStudio.supine/linjie-community.git
+          git config --global credential.helper store
+          echo "https://cnb:${CNB_TOKEN}@cnb.cool" > ~/.git-credentials
+          git push cnb main --force
