@@ -5,6 +5,7 @@ import { ActiveUsersPanel } from '@/components/shell/ActiveUsersPanel';
 import { PageTransition } from '@/components/transitions/PageTransition';
 import { ScrollToTop } from '@/components/shell/ScrollToTop';
 import { HeartbeatTicker } from '@/components/shell/HeartbeatTicker';
+import { SupportWidget } from '@/components/support/SupportWidget';
 import { getSectionTree } from '@/lib/sections';
 
 export default async function AppLayout({
@@ -40,6 +41,7 @@ export default async function AppLayout({
       </div>
       <ScrollToTop />
       {user ? <HeartbeatTicker /> : null}
+      <SupportWidget />
     </div>
   );
 }

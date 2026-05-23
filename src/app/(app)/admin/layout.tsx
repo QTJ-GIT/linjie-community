@@ -42,6 +42,7 @@ export default async function AdminLayout({
           <AdminNavLink href="/admin/users">用户</AdminNavLink>
           <AdminNavLink href="/admin/posts">帖子</AdminNavLink>
           <AdminNavLink href="/admin/teaching">教学</AdminNavLink>
+          <AdminNavLink href="/admin/support">客服</AdminNavLink>
         </nav>
       </div>
       <div>{children}</div>
