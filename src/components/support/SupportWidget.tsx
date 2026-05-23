@@ -14,15 +14,15 @@ export function SupportWidget() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'fixed bottom-6 right-6 z-[100] flex h-14 w-14 items-center justify-center rounded-full shadow-2xl ring-2 ring-white/30 transition-all duration-300 hover:scale-110',
+          'fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full px-4 py-3 shadow-xl transition-all duration-300 hover:scale-105',
           isOpen
             ? 'bg-muted text-muted-foreground rotate-0'
-            : 'bg-[hsl(var(--brand-500))] text-white hover:bg-[hsl(var(--brand-600))] animate-pulse'
+            : 'bg-primary text-primary-foreground hover:bg-primary/90'
         )}
-        style={{ boxShadow: '0 8px 32px hsl(var(--brand-500) / 0.4)' }}
         aria-label="客服"
       >
-        <MessageCircle className="h-6 w-6" />
+        <MessageCircle className="h-5 w-5" />
+        <span className="text-sm font-medium">客服</span>
       </button>
 
       {/* 客服对话浮窗 */}
