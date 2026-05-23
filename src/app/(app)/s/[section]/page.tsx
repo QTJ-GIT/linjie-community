@@ -6,17 +6,11 @@ import { createClient } from '@/lib/supabase/server';
 import { FeedList, type FeedSortKey } from '@/components/posts/FeedList';
 import { PostListSkeleton } from '@/components/posts/PostListSkeleton';
 import { Button } from '@/components/ui/button';
-import { SECTION_SLUGS, type SectionSlug } from '@/lib/validators/post';
+import { fetchAllSections } from '@/lib/sections';
 import { cn } from '@/lib/utils';
 import { SITE } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
-
-const SECTION_LABELS: Record<SectionSlug, { name: string; description: string }> = {
-  general: { name: '综合讨论', description: '开放式交流' },
-  qa: { name: '问答', description: '提问与作答' },
-  stocks: { name: '股票话题', description: '股票相关讨论' },
-};
 
 const SORTS: { key: FeedSortKey; label: string }[] = [
   { key: 'hot', label: '热门' },
@@ -30,34 +24,31 @@ function parseSort(v: string | undefined): FeedSortKey {
   return 'hot';
 }
 
-function isSectionSlug(v: string): v is SectionSlug {
-  return (SECTION_SLUGS as readonly string[]).includes(v);
-}
-
 export async function generateMetadata({
   params,
 }: {
   params: { section: string };
 }): Promise<Metadata> {
-  if (!isSectionSlug(params.section)) {
+  const sections = await fetchAllSections();
+  const section = sections.find((s) => s.slug === params.section);
+  if (!section) {
     return { title: `分区 · ${SITE.name}` };
   }
-  const meta = SECTION_LABELS[params.section];
-  const title = `${meta.name} · ${SITE.name}`;
+  const title = `${section.name} · ${SITE.name}`;
   const url = `${SITE.url}/s/${params.section}`;
   return {
     title,
-    description: meta.description,
+    description: section.description ?? undefined,
     alternates: { canonical: url },
     openGraph: {
       title,
-      description: meta.description,
+      description: section.description ?? undefined,
       url,
       type: 'website',
       siteName: SITE.name,
       locale: SITE.locale,
     },
-    twitter: { card: 'summary_large_image', title, description: meta.description },
+    twitter: { card: 'summary_large_image', title, description: section.description ?? undefined },
   };
 }
 
@@ -68,9 +59,11 @@ export default async function SectionPage({
   params: { section: string };
   searchParams?: { sort?: string };
 }) {
-  if (!isSectionSlug(params.section)) notFound();
+  const sections = await fetchAllSections();
+  const section = sections.find((s) => s.slug === params.section);
+  if (!section) notFound();
+
   const sectionSlug = params.section;
-  const meta = SECTION_LABELS[sectionSlug];
   const sort = parseSort(searchParams?.sort);
 
   // Only fetch the viewer for the header CTA; actual list streams in via <Suspense>.
@@ -83,8 +76,8 @@ export default async function SectionPage({
     <div className="mx-auto max-w-2xl space-y-4 p-4 sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">{meta.name}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{meta.description}</p>
+          <h1 className="text-2xl font-semibold">{section.name}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
         </div>
         {user ? (
           <Button asChild size="sm">

@@ -99,6 +99,12 @@ export async function generateMetadata({
 }: {
   params: { id: string; cid: string };
 }): Promise<Metadata> {
+  // 无效的 UUID 格式直接返回默认标题
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(params.id) || !uuidRegex.test(params.cid)) {
+    return { title: `楼中楼 · ${SITE.name}` };
+  }
+
   const supabase = createClient();
   const { data: post } = await supabase
     .from('posts')
@@ -125,6 +131,11 @@ export default async function CommentFocusPage({
   params: { id: string; cid: string };
 }) {
   const { id: postId, cid } = params;
+
+  // 无效的 UUID 格式直接 404
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(postId) || !uuidRegex.test(cid)) notFound();
+
   const supabase = createClient();
   const {
     data: { user },

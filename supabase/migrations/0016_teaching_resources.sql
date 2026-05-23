@@ -2,7 +2,7 @@
 -- 教学大厅：teaching_resources 表 + teaching-videos Storage bucket
 
 -- ── 1. 表 ──────────────────────────────────────────────────────────────
-CREATE TABLE public.teaching_resources (
+CREATE TABLE IF NOT EXISTS public.teaching_resources (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   author_id       UUID        NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   type            TEXT        NOT NULL CHECK (type IN ('video', 'article')),
@@ -23,12 +23,12 @@ CREATE TABLE public.teaching_resources (
   is_deleted      BOOLEAN     NOT NULL DEFAULT FALSE
 );
 
-CREATE INDEX teaching_resources_author_idx  ON public.teaching_resources (author_id);
-CREATE INDEX teaching_resources_type_idx    ON public.teaching_resources (type);
-CREATE INDEX teaching_resources_created_idx ON public.teaching_resources (created_at DESC);
+CREATE INDEX IF NOT EXISTS teaching_resources_author_idx  ON public.teaching_resources (author_id);
+CREATE INDEX IF NOT EXISTS teaching_resources_type_idx    ON public.teaching_resources (type);
+CREATE INDEX IF NOT EXISTS teaching_resources_created_idx ON public.teaching_resources (created_at DESC);
 
 -- ── 2. RLS ─────────────────────────────────────────────────────────────
-ALTER TABLE public.teaching_resources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.teaching_resources ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "teaching: public read"
   ON public.teaching_resources FOR SELECT

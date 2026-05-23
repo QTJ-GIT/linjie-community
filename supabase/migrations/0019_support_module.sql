@@ -1,7 +1,7 @@
 -- 客服模块：support_sessions + support_messages + support_faqs
 
 -- ── 1. 客服会话表 ──────────────────────────────────────────────────────
-CREATE TABLE public.support_sessions (
+CREATE TABLE IF NOT EXISTS public.support_sessions (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id     UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   user_name   TEXT NOT NULL DEFAULT '匿名用户',
@@ -13,11 +13,11 @@ CREATE TABLE public.support_sessions (
   is_deleted  BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE INDEX support_sessions_user_idx   ON public.support_sessions (user_id);
-CREATE INDEX support_sessions_status_idx ON public.support_sessions (status);
-CREATE INDEX support_sessions_created_idx ON public.support_sessions (created_at DESC);
+CREATE INDEX IF NOT EXISTS support_sessions_user_idx   ON public.support_sessions (user_id);
+CREATE INDEX IF NOT EXISTS support_sessions_status_idx ON public.support_sessions (status);
+CREATE INDEX IF NOT EXISTS support_sessions_created_idx ON public.support_sessions (created_at DESC);
 
-ALTER TABLE public.support_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.support_sessions ENABLE ROW LEVEL SECURITY;
 
 -- 用户只能看自己的会话
 CREATE POLICY "support_session: user read own"
@@ -28,7 +28,7 @@ CREATE POLICY "support_session: user read own"
 CREATE POLICY "support_session: admin read all"
   ON public.support_sessions FOR SELECT
   USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
   );
 
 -- 任何人可以创建（匿名用户通过 service role 插入）
@@ -40,11 +40,11 @@ CREATE POLICY "support_session: public insert"
 CREATE POLICY "support_session: admin update"
   ON public.support_sessions FOR UPDATE
   USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
   );
 
 -- ── 2. 客服消息表 ──────────────────────────────────────────────────────
-CREATE TABLE public.support_messages (
+CREATE TABLE IF NOT EXISTS public.support_messages (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   session_id  UUID NOT NULL REFERENCES public.support_sessions(id) ON DELETE CASCADE,
   sender_type TEXT NOT NULL CHECK (sender_type IN ('user', 'admin', 'system')),
@@ -54,9 +54,9 @@ CREATE TABLE public.support_messages (
   is_deleted  BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE INDEX support_messages_session_idx ON public.support_messages (session_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS support_messages_session_idx ON public.support_messages (session_id, created_at DESC);
 
-ALTER TABLE public.support_messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.support_messages ENABLE ROW LEVEL SECURITY;
 
 -- 用户只能看自己会话的消息
 CREATE POLICY "support_message: user read own"
@@ -73,7 +73,7 @@ CREATE POLICY "support_message: user read own"
 CREATE POLICY "support_message: admin read all"
   ON public.support_messages FOR SELECT
   USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
   );
 
 -- 任何人可以发消息（匿名用户通过 service role）
@@ -82,7 +82,7 @@ CREATE POLICY "support_message: public insert"
   WITH CHECK (true);
 
 -- ── 3. 常见问题自动回复表 ──────────────────────────────────────────────
-CREATE TABLE public.support_faqs (
+CREATE TABLE IF NOT EXISTS public.support_faqs (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   keywords    TEXT[] NOT NULL DEFAULT '{}',
   question    TEXT NOT NULL,
@@ -92,7 +92,7 @@ CREATE TABLE public.support_faqs (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-ALTER TABLE public.support_faqs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.support_faqs ENABLE ROW LEVEL SECURITY;
 
 -- 所有人可读
 CREATE POLICY "support_faq: public read"
@@ -103,7 +103,7 @@ CREATE POLICY "support_faq: public read"
 CREATE POLICY "support_faq: admin write"
   ON public.support_faqs FOR ALL
   USING (
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND is_admin = true)
   );
 
 -- ── 4. 初始化 FAQ 数据 ─────────────────────────────────────────────────

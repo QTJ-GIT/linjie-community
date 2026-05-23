@@ -29,6 +29,12 @@ export async function generateMetadata({
   params: { id: string };
 }): Promise<Metadata> {
   const supabase = createClient();
+  // 无效的 UUID 格式直接 404
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(params.id)) {
+    return { title: `帖子 · ${SITE.name}` };
+  }
+
   const { data: post } = await supabase
     .from('posts')
     .select('title, body_text, is_deleted, created_at, updated_at')
@@ -99,6 +105,10 @@ export default async function PostDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // 无效的 UUID 格式直接 404
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(params.id)) notFound();
+
   const { data: post, error } = await supabase
     .from('posts')
     .select(
@@ -110,14 +120,7 @@ export default async function PostDetailPage({
     .eq('id', params.id)
     .maybeSingle();
 
-  if (error) {
-    return (
-      <div className="mx-auto max-w-2xl p-6">
-        <p className="text-sm text-destructive">加载失败：{error.message}</p>
-      </div>
-    );
-  }
-  if (!post || post.is_deleted) notFound();
+  if (error || !post || post.is_deleted) notFound();
 
   const author = pickAuthor(post.author);
   const tickers = (post.post_tickers as { symbol: string }[] | null)?.map((t) => t.symbol) ?? [];

@@ -13,6 +13,9 @@ export default async function AdminNewTeachingPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/admin-login');
 
+  const { data: isAdmin } = await supabase.rpc('is_admin');
+  if (!isAdmin) redirect('/admin-login');
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>

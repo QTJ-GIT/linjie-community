@@ -10,6 +10,10 @@ interface PageProps {
 }
 
 export default async function AttachPollPage({ params }: PageProps) {
+  // 无效的 UUID 格式直接 404
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(params.id)) notFound();
+
   const supabase = createClient();
   const {
     data: { user },

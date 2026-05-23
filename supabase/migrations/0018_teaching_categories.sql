@@ -2,7 +2,7 @@
 -- 教学大厅分类功能
 
 -- 1. 给 teaching_resources 添加 category 字段
-ALTER TABLE public.teaching_resources
+ALTER TABLE IF EXISTS public.teaching_resources
   ADD COLUMN IF NOT EXISTS category TEXT;
 
 -- 2. 创建索引加速分类筛选

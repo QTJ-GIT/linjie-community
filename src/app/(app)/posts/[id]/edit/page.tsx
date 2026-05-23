@@ -17,20 +17,17 @@ export default async function EditPostPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/login?next=/posts/${params.id}/edit`);
 
+  // 无效的 UUID 格式直接 404
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(params.id)) notFound();
+
   const { data: post, error } = await supabase
     .from('posts')
     .select('id, author_id, section_slug, type, title, body_json, body_text, is_deleted, sentiment')
     .eq('id', params.id)
     .maybeSingle();
 
-  if (error) {
-    return (
-      <div className="mx-auto max-w-2xl p-6">
-        <p className="text-sm text-destructive">加载失败：{error.message}</p>
-      </div>
-    );
-  }
-  if (!post || post.is_deleted) notFound();
+  if (error || !post || post.is_deleted) notFound();
   if (post.author_id !== user.id) redirect(`/posts/${params.id}`);
 
   return (

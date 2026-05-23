@@ -31,6 +31,14 @@ export async function createPost(
   const { title, body_json, section_slug, sentiment } = parsed.data;
   let { type, body_text } = parsed.data;
 
+  // 验证 section 是否存在于数据库
+  const { data: sectionExists } = await supabase
+    .from('sections')
+    .select('slug')
+    .eq('slug', section_slug)
+    .maybeSingle();
+  if (!sectionExists) return { ok: false, error: '所选分区不存在' };
+
   // stocks section only allows 普通帖
   if (section_slug === 'stocks') type = 'post';
 
@@ -73,6 +81,16 @@ export async function updatePost(
 
   const { id, title, body_json, section_slug, sentiment } = parsed.data;
   let { type, body_text } = parsed.data;
+
+  // 验证 section 是否存在于数据库（如果提供了）
+  if (section_slug) {
+    const { data: sectionExists } = await supabase
+      .from('sections')
+      .select('slug')
+      .eq('slug', section_slug)
+      .maybeSingle();
+    if (!sectionExists) return { ok: false, error: '所选分区不存在' };
+  }
 
   if (section_slug === 'stocks') type = 'post';
 

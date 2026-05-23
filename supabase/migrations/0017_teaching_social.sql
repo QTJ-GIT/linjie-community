@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.teaching_likes (
   PRIMARY KEY (user_id, resource_id)
 );
 CREATE INDEX IF NOT EXISTS teaching_likes_resource_idx ON public.teaching_likes (resource_id);
-ALTER TABLE public.teaching_likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.teaching_likes ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "teaching_likes: read"   ON public.teaching_likes;
 DROP POLICY IF EXISTS "teaching_likes: insert" ON public.teaching_likes;
 DROP POLICY IF EXISTS "teaching_likes: delete" ON public.teaching_likes;
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.teaching_bookmarks (
   PRIMARY KEY (user_id, resource_id)
 );
 CREATE INDEX IF NOT EXISTS teaching_bookmarks_user_idx ON public.teaching_bookmarks (user_id);
-ALTER TABLE public.teaching_bookmarks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.teaching_bookmarks ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "teaching_bookmarks: self" ON public.teaching_bookmarks;
 CREATE POLICY "teaching_bookmarks: self" ON public.teaching_bookmarks FOR ALL USING (auth.uid() = user_id);
 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.teaching_comments (
   is_deleted  BOOLEAN NOT NULL DEFAULT FALSE
 );
 CREATE INDEX IF NOT EXISTS teaching_comments_resource_idx ON public.teaching_comments (resource_id, created_at DESC);
-ALTER TABLE public.teaching_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS public.teaching_comments ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "teaching_comments: public read"   ON public.teaching_comments;
 DROP POLICY IF EXISTS "teaching_comments: author insert" ON public.teaching_comments;
 DROP POLICY IF EXISTS "teaching_comments: author update" ON public.teaching_comments;

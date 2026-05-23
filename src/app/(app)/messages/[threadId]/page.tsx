@@ -23,6 +23,10 @@ export default async function MessageThreadPage({
 }: {
   params: { threadId: string };
 }) {
+  // 无效的 UUID 格式直接 404
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(params.threadId)) notFound();
+
   const supabase = createClient();
   const {
     data: { user },
@@ -37,15 +41,7 @@ export default async function MessageThreadPage({
     .eq('id', params.threadId)
     .maybeSingle();
 
-  if (threadErr) {
-    return (
-      <div className="mx-auto max-w-2xl space-y-4 p-4 sm:p-6">
-        <h1 className="text-xl font-semibold">消息</h1>
-        <p className="text-sm text-destructive">加载失败：{threadErr.message}</p>
-      </div>
-    );
-  }
-  if (!thread) notFound();
+  if (threadErr || !thread) notFound();
   if (thread.user_a_id !== user.id && thread.user_b_id !== user.id) {
     notFound();
   }

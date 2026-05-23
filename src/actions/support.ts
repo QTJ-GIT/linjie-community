@@ -254,10 +254,12 @@ export async function closeSupportSession(sessionId: string) {
 
 export async function getMySupportSessions(): Promise<SupportSession[]> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data, error } = await supabase
     .from('support_sessions')
     .select('*')
+    .eq('user_id', user?.id ?? '')
     .eq('is_deleted', false)
     .order('updated_at', { ascending: false });
 
