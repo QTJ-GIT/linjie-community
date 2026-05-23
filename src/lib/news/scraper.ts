@@ -1,21 +1,6 @@
 import * as cheerio from 'cheerio';
-
-export interface NewsItem {
-  id: string;
-  title: string;
-  url: string;
-  source: string;
-  publish_time: string;
-  category: string;
-}
-
-export interface NewsDetail {
-  title: string;
-  content: string;
-  source: string;
-  publish_time: string;
-  url: string;
-}
+import type { NewsItem, NewsDetail } from './types';
+export type { NewsItem, NewsDetail };
 
 const HEADERS = {
   'User-Agent':

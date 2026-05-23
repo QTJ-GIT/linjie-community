@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ChevronLeft, Newspaper, ExternalLink, Calendar, Shield } from 'lucide-react';
-import { fetchNewsDetail } from '@/lib/news/scraper';
 import { SITE } from '@/lib/site';
+import type { NewsDetail } from '@/lib/news/types';
 import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
@@ -11,6 +11,26 @@ export const dynamic = 'force-dynamic';
 interface PageProps {
   params: { id: string };
   searchParams?: { url?: string };
+}
+
+async function fetchNewsDetail(url: string): Promise<NewsDetail> {
+  try {
+    const res = await fetch(
+      `http://localhost:3000/api/news/detail?url=${encodeURIComponent(url)}`,
+      { next: { revalidate: 0 } }
+    );
+    if (!res.ok) throw new Error('fetch failed');
+    const json = await res.json();
+    return json.data || { title: '获取失败', content: '<p>暂无内容</p>', source: '新浪财经', publish_time: '', url };
+  } catch {
+    return {
+      title: '获取详情失败',
+      content: '<p>抱歉，暂时无法获取该资讯的详细内容。</p>',
+      source: '新浪财经',
+      publish_time: new Date().toLocaleString('zh-CN'),
+      url,
+    };
+  }
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {

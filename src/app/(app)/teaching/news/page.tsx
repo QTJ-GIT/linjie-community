@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { Newspaper, ChevronLeft, RefreshCw, ExternalLink, Clock, Shield } from 'lucide-react';
-import { fetchNewsList, type NewsItem } from '@/lib/news/scraper';
 import { SITE } from '@/lib/site';
+import type { NewsItem } from '@/lib/news/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -39,6 +39,17 @@ function formatTime(dateString: string): string {
     return date.toLocaleDateString('zh-CN');
   } catch {
     return dateString;
+  }
+}
+
+async function fetchNewsList(): Promise<NewsItem[]> {
+  try {
+    const res = await fetch('http://localhost:3000/api/news', { next: { revalidate: 0 } });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.data || [];
+  } catch {
+    return [];
   }
 }
 
