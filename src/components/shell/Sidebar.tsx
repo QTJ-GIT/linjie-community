@@ -55,8 +55,8 @@ const STATIC_BROWSE_HEAD: NavItem[] = [
 
 const STATIC_BROWSE_TAIL: NavItem[] = [
   { href: '/teaching', label: '教学大厅', icon: GraduationCap },
-  { href: '/teaching/news', label: '股市新闻', icon: Newspaper },
   { href: '/tickers', label: '股票', icon: LineChart },
+  { href: '/news', label: '股市新闻', icon: Newspaper },
   { href: '/trending', label: '热度', icon: Flame },
 ];
 

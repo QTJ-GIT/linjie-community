@@ -54,11 +54,7 @@ export default async function NewsDetailPage({ searchParams }: PageProps) {
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
       {/* 面包屑 */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Link href="/teaching" className="hover:text-foreground transition-colors">
-          教学大厅
-        </Link>
-        <span>/</span>
-        <Link href="/teaching/news" className="hover:text-foreground transition-colors">
+        <Link href="/news" className="hover:text-foreground transition-colors">
           股市新闻
         </Link>
         <span>/</span>
@@ -68,7 +64,7 @@ export default async function NewsDetailPage({ searchParams }: PageProps) {
       {/* 返回 */}
       <div>
         <Button asChild variant="ghost" size="sm" className="gap-1 -ml-2 text-muted-foreground">
-          <Link href="/teaching/news">
+          <Link href="/news">
             <ChevronLeft className="h-4 w-4" />
             返回列表
           </Link>

@@ -106,7 +106,7 @@ export default async function TeachingPage({
 
       {/* 股市新闻入口 */}
       <Link
-        href="/teaching/news"
+        href="/news"
         className="group flex items-center justify-between rounded-xl border border-border/60 bg-gradient-to-r from-card to-muted/30 p-4 transition-all hover:border-primary/40 hover:shadow-sm"
       >
         <div className="flex items-center gap-3">

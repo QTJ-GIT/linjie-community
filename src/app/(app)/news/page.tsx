@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { Newspaper, ChevronLeft, RefreshCw, ExternalLink, Clock, Shield } from 'lucide-react';
+import { Newspaper, RefreshCw, ExternalLink, Clock, Shield } from 'lucide-react';
 import { SITE } from '@/lib/site';
 import type { NewsItem } from '@/lib/news/types';
 import { Badge } from '@/components/ui/badge';
@@ -78,17 +78,6 @@ export default async function NewsPage({
       {/* 头部 */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Link
-              href="/teaching"
-              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              教学大厅
-            </Link>
-            <span>/</span>
-            <span className="text-foreground">股市新闻</span>
-          </div>
           <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
             <Newspaper className="h-6 w-6 text-[hsl(var(--brand-500))]" />
             股市新闻
@@ -98,7 +87,7 @@ export default async function NewsPage({
           </p>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link href="/teaching/news">
+          <Link href="/news">
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
             刷新
           </Link>
@@ -116,7 +105,7 @@ export default async function NewsPage({
         {categories.map((cat) => (
           <Link
             key={cat}
-            href={cat === 'all' ? '/teaching/news' : `/teaching/news?category=${encodeURIComponent(cat)}`}
+            href={cat === 'all' ? '/news' : `/news?category=${encodeURIComponent(cat)}`}
             className={
               'rounded-full px-3 py-1 text-xs font-medium transition-colors border ' +
               (activeCategory === cat || (cat === 'all' && activeCategory === 'all')
@@ -130,7 +119,7 @@ export default async function NewsPage({
       </div>
 
       {/* 搜索 */}
-      <form className="flex gap-2" action="/teaching/news" method="GET">
+      <form className="flex gap-2" action="/news" method="GET">
         <input
           type="text"
           name="q"
@@ -180,7 +169,7 @@ function NewsCard({ item }: { item: NewsItem }) {
           </div>
 
           <h3 className="text-sm font-semibold leading-snug group-hover:text-[hsl(var(--brand-600))] transition-colors line-clamp-2">
-            <Link href={`/teaching/news/${item.id}?url=${encodeURIComponent(item.url)}`}>
+            <Link href={`/news/${item.id}?url=${encodeURIComponent(item.url)}`}>
               {item.title}
             </Link>
           </h3>
@@ -194,7 +183,7 @@ function NewsCard({ item }: { item: NewsItem }) {
         </div>
 
         <Link
-          href={`/teaching/news/${item.id}?url=${encodeURIComponent(item.url)}`}
+          href={`/news/${item.id}?url=${encodeURIComponent(item.url)}`}
           className="shrink-0 rounded-lg border border-border/60 bg-background p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           title="查看详情"
         >
