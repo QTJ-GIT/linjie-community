@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Hash,
   GraduationCap,
+  Newspaper,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -54,6 +55,7 @@ const STATIC_BROWSE_HEAD: NavItem[] = [
 
 const STATIC_BROWSE_TAIL: NavItem[] = [
   { href: '/teaching', label: '教学大厅', icon: GraduationCap },
+  { href: '/teaching/news', label: '股市新闻', icon: Newspaper },
   { href: '/tickers', label: '股票', icon: LineChart },
   { href: '/trending', label: '热度', icon: Flame },
 ];

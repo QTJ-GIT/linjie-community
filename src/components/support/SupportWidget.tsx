@@ -14,7 +14,8 @@ export function SupportWidget() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full px-4 py-3 shadow-xl transition-all duration-300 hover:scale-105',
+          'fixed z-50 flex items-center gap-2 rounded-full px-4 py-3 shadow-xl transition-all duration-300 hover:scale-105',
+          'bottom-20 right-4 sm:bottom-6 sm:right-6',
           isOpen
             ? 'bg-muted text-muted-foreground rotate-0'
             : 'bg-primary text-primary-foreground hover:bg-primary/90'

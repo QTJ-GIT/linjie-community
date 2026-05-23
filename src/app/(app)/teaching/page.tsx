@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Newspaper, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { TeachingCard } from '@/components/teaching/TeachingCard';
 import { cn } from '@/lib/utils';
@@ -103,6 +103,25 @@ export default async function TeachingPage({
         <h1 className="text-2xl font-semibold">教学大厅</h1>
         <p className="mt-1 text-sm text-muted-foreground">视频教程与文章，供所有人免费浏览</p>
       </div>
+
+      {/* 股市新闻入口 */}
+      <Link
+        href="/teaching/news"
+        className="group flex items-center justify-between rounded-xl border border-border/60 bg-gradient-to-r from-card to-muted/30 p-4 transition-all hover:border-primary/40 hover:shadow-sm"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Newspaper className="h-5 w-5" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+              股市新闻
+            </p>
+            <p className="text-xs text-muted-foreground">实时财经资讯与市场动态</p>
+          </div>
+        </div>
+        <ArrowRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
+      </Link>
 
       {/* 类型筛选 */}
       <nav className="flex items-center gap-1 border-b">
