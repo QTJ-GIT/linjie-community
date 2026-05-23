@@ -3,6 +3,7 @@ import { Toaster } from 'sonner';
 import { SITE } from '@/lib/site';
 import { ShortcutsProvider } from '@/components/shortcuts-provider';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { SupportWidget } from '@/components/support/SupportWidget';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -43,6 +44,7 @@ export default function RootLayout({
           {children}
           <ShortcutsProvider />
           <Toaster richColors position="top-center" />
+          <SupportWidget />
         </ThemeProvider>
       </body>
     </html>
