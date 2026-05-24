@@ -1,0 +1,59 @@
+# 阿里云函数计算 (FC) 部署配置
+# 临介社区 - Next.js 应用国内部署
+# 文档: https://docs.serverless-devs.com/
+
+edition: 1.0.0
+name: linjie-community
+access: default
+
+vars:
+  region: cn-hangzhou
+  serviceName: linjie-community
+  functionName: web
+
+services:
+  web:
+    component: fc
+    props:
+      region: ${vars.region}
+      service:
+        name: ${vars.serviceName}
+        description: '临介社区 - 国内Serverless部署'
+        internetAccess: true
+      function:
+        name: ${vars.functionName}
+        description: 'Next.js 14 Web App'
+        codeUri: './deploy'
+        runtime: custom.debian10
+        timeout: 60
+        caPort: 3000
+        memorySize: 512
+        layers:
+          - acs:fc:${vars.region}:official:layers/Nodejs20/versions/1
+        environmentVariables:
+          PATH: /opt/nodejs20/bin:/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          # 以下变量会从当前 Shell 环境读取，确保部署前已加载 .env.local
+          NEXT_PUBLIC_SUPABASE_URL: ${env.NEXT_PUBLIC_SUPABASE_URL}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${env.NEXT_PUBLIC_SUPABASE_ANON_KEY}
+          SUPABASE_SERVICE_ROLE_KEY: ${env.SUPABASE_SERVICE_ROLE_KEY}
+          ADMIN_INVITE_CODE: ${env.ADMIN_INVITE_CODE}
+        customRuntimeConfig:
+          command:
+            - node
+            - server.js
+      triggers:
+        - name: http
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: '/*'

@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { ChevronRight, Pencil } from 'lucide-react';
+import { PostDeleteButton } from '@/components/posts/PostDeleteButton';
 import { createClient } from '@/lib/supabase/server';
 import { SITE } from '@/lib/site';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -154,6 +155,12 @@ export default async function PostDetailPage({
   const postBookmarked = Boolean(bookmarkedRes.data);
 
   const isViewerAuthor = user?.id === post.author_id;
+
+  // Check admin status
+  const { data: isAdmin } = user
+    ? await supabase.rpc('is_admin')
+    : { data: false };
+
   const initials = (author.display_name ?? author.handle ?? '?').slice(0, 1);
 
   return (
@@ -222,13 +229,22 @@ export default async function PostDetailPage({
                 @{author.handle}
               </div>
             </div>
-            {isViewerAuthor ? (
-              <Button asChild variant="ghost" size="sm" className="gap-1">
-                <Link href={`/posts/${post.id}/edit`}>
-                  <Pencil className="h-4 w-4" />
-                  编辑
-                </Link>
-              </Button>
+            {isViewerAuthor || isAdmin ? (
+              <div className="flex items-center gap-1">
+                {isViewerAuthor ? (
+                  <Button asChild variant="ghost" size="sm" className="gap-1">
+                    <Link href={`/posts/${post.id}/edit`}>
+                      <Pencil className="h-4 w-4" />
+                      编辑
+                    </Link>
+                  </Button>
+                ) : null}
+                <PostDeleteButton
+                  postId={post.id}
+                  isAuthor={isViewerAuthor}
+                  isAdmin={!!isAdmin}
+                />
+              </div>
             ) : null}
           </div>
 
