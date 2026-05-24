@@ -38,6 +38,8 @@ export type Post = {
   body_text: string;
   accepted_answer_id: string | null;
   is_deleted: boolean;
+  deleted_by?: string | null;
+  deleted_at?: string | null;
   created_at: string;
   updated_at: string;
   score: number;
@@ -67,6 +69,8 @@ export type Comment = {
   body_text: string;
   is_answer: boolean;
   is_deleted: boolean;
+  deleted_by?: string | null;
+  deleted_at?: string | null;
   created_at: string;
   updated_at: string;
   score: number;

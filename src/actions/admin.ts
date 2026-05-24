@@ -66,9 +66,10 @@ export async function softDeletePost(postId: string): Promise<ActionResult> {
   const guard = await requireAdmin();
   if (!guard.ok) return { ok: false, error: guard.error };
 
+  const now = new Date().toISOString();
   const { error } = await guard.supabase
     .from('posts')
-    .update({ is_deleted: true, updated_at: new Date().toISOString() })
+    .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
     .eq('id', postId);
   if (error) return { ok: false, error: error.message };
   revalidatePath('/admin/posts');
@@ -83,9 +84,10 @@ export async function softDeleteComment(
   const guard = await requireAdmin();
   if (!guard.ok) return { ok: false, error: guard.error };
 
+  const now = new Date().toISOString();
   const { error } = await guard.supabase
     .from('comments')
-    .update({ is_deleted: true, updated_at: new Date().toISOString() })
+    .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
     .eq('id', commentId);
   if (error) return { ok: false, error: error.message };
   revalidatePath('/admin/reports');
@@ -134,12 +136,12 @@ export async function softDeleteUserContent(
   const [{ error: postsError }, { error: commentsError }] = await Promise.all([
     guard.supabase
       .from('posts')
-      .update({ is_deleted: true, updated_at: now })
+      .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
       .eq('author_id', userId)
       .eq('is_deleted', false),
     guard.supabase
       .from('comments')
-      .update({ is_deleted: true, updated_at: now })
+      .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
       .eq('author_id', userId)
       .eq('is_deleted', false),
   ]);

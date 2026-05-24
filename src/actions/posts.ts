@@ -127,9 +127,10 @@ export async function deletePost(id: string): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: '请先登录' };
 
+  const now = new Date().toISOString();
   const { error } = await supabase
     .from('posts')
-    .update({ is_deleted: true, updated_at: new Date().toISOString() })
+    .update({ is_deleted: true, deleted_by: user.id, deleted_at: now, updated_at: now })
     .eq('id', id)
     .eq('author_id', user.id);
 
