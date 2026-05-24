@@ -63,14 +63,8 @@ export async function pinPost(
 }
 
 export async function softDeletePost(postId: string): Promise<ActionResult> {
-  const guard = await requireAdmin();
-  if (!guard.ok) return { ok: false, error: guard.error };
-
-  const now = new Date().toISOString();
-  const { error } = await guard.supabase
-    .from('posts')
-    .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
-    .eq('id', postId);
+  const supabase = createClient();
+  const { error } = await supabase.rpc('delete_post', { post_id: postId });
   if (error) return { ok: false, error: error.message };
   revalidatePath('/admin/posts');
   revalidatePath('/feed');
@@ -81,14 +75,8 @@ export async function softDeletePost(postId: string): Promise<ActionResult> {
 export async function softDeleteComment(
   commentId: string
 ): Promise<ActionResult> {
-  const guard = await requireAdmin();
-  if (!guard.ok) return { ok: false, error: guard.error };
-
-  const now = new Date().toISOString();
-  const { error } = await guard.supabase
-    .from('comments')
-    .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
-    .eq('id', commentId);
+  const supabase = createClient();
+  const { error } = await supabase.rpc('delete_comment', { comment_id: commentId });
   if (error) return { ok: false, error: error.message };
   revalidatePath('/admin/reports');
   return { ok: true };
@@ -114,40 +102,11 @@ export async function toggleUserAdmin(
 export async function softDeleteUserContent(
   userId: string
 ): Promise<ActionResult<{ posts: number; comments: number }>> {
-  const guard = await requireAdmin();
-  if (!guard.ok) return { ok: false, error: guard.error };
-
-  const now = new Date().toISOString();
-
-  // 先获取要删除的数量
-  const [{ count: postsCount }, { count: commentsCount }] = await Promise.all([
-    guard.supabase
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('author_id', userId)
-      .eq('is_deleted', false),
-    guard.supabase
-      .from('comments')
-      .select('id', { count: 'exact', head: true })
-      .eq('author_id', userId)
-      .eq('is_deleted', false),
-  ]);
-
-  const [{ error: postsError }, { error: commentsError }] = await Promise.all([
-    guard.supabase
-      .from('posts')
-      .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
-      .eq('author_id', userId)
-      .eq('is_deleted', false),
-    guard.supabase
-      .from('comments')
-      .update({ is_deleted: true, deleted_by: guard.user.id, deleted_at: now, updated_at: now })
-      .eq('author_id', userId)
-      .eq('is_deleted', false),
-  ]);
-
-  if (postsError) return { ok: false, error: postsError.message };
-  if (commentsError) return { ok: false, error: commentsError.message };
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('admin_delete_user_content', {
+    target_user_id: userId,
+  });
+  if (error) return { ok: false, error: error.message };
 
   revalidatePath('/admin/users');
   revalidatePath(`/admin/users/${userId}`);
@@ -157,8 +116,8 @@ export async function softDeleteUserContent(
   return {
     ok: true,
     data: {
-      posts: postsCount ?? 0,
-      comments: commentsCount ?? 0,
+      posts: data?.[0]?.posts_count ?? 0,
+      comments: data?.[0]?.comments_count ?? 0,
     },
   };
 }

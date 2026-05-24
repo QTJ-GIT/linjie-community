@@ -122,18 +122,7 @@ export async function updatePost(
 
 export async function deletePost(id: string): Promise<ActionResult> {
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: '请先登录' };
-
-  const now = new Date().toISOString();
-  const { error } = await supabase
-    .from('posts')
-    .update({ is_deleted: true, deleted_by: user.id, deleted_at: now, updated_at: now })
-    .eq('id', id)
-    .eq('author_id', user.id);
-
+  const { error } = await supabase.rpc('delete_post', { post_id: id });
   if (error) return { ok: false, error: error.message };
   revalidatePath('/feed');
   return { ok: true };
