@@ -128,6 +128,18 @@ function parseSinaResponse(text: string, key: string): MarketData | null {
   }
 }
 
+async function fetchWithTimeout(url: string, headers: Record<string, string>, timeoutMs: number): Promise<Response | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, { headers, signal: controller.signal, next: { revalidate: 0 } });
+    clearTimeout(timeout);
+    return res;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchFromSina(): Promise<GoldApiResponse> {
   const headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -135,17 +147,18 @@ async function fetchFromSina(): Promise<GoldApiResponse> {
   };
 
   try {
+    // 每个请求最多3秒，防止Vercel国外节点访问国内API超时
     const [goldRes, silverRes, dollarRes, oilRes] = await Promise.all([
-      fetch('https://hq.sinajs.cn/list=hf_GC', { headers, next: { revalidate: 0 } }),
-      fetch('https://hq.sinajs.cn/list=hf_SI', { headers, next: { revalidate: 0 } }),
-      fetch('https://hq.sinajs.cn/list=usdx', { headers, next: { revalidate: 0 } }),
-      fetch('https://hq.sinajs.cn/list=hf_CL', { headers, next: { revalidate: 0 } }),
+      fetchWithTimeout('https://hq.sinajs.cn/list=hf_GC', headers, 3000),
+      fetchWithTimeout('https://hq.sinajs.cn/list=hf_SI', headers, 3000),
+      fetchWithTimeout('https://hq.sinajs.cn/list=usdx', headers, 3000),
+      fetchWithTimeout('https://hq.sinajs.cn/list=hf_CL', headers, 3000),
     ]);
 
-    const goldText = goldRes.ok ? await goldRes.text() : '';
-    const silverText = silverRes.ok ? await silverRes.text() : '';
-    const dollarText = dollarRes.ok ? await dollarRes.text() : '';
-    const oilText = oilRes.ok ? await oilRes.text() : '';
+    const goldText = goldRes?.ok ? await goldRes.text() : '';
+    const silverText = silverRes?.ok ? await silverRes.text() : '';
+    const dollarText = dollarRes?.ok ? await dollarRes.text() : '';
+    const oilText = oilRes?.ok ? await oilRes.text() : '';
 
     const gold = parseSinaResponse(goldText, 'hq_str_hf_GC');
     const silver = parseSinaResponse(silverText, 'hq_str_hf_SI');
