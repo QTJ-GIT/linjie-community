@@ -27,15 +27,17 @@ export function PostDeleteButton({
     if (!confirm(msg)) return;
 
     startTransition(async () => {
+      console.log('[PostDeleteButton] deleting post', postId, 'isAdmin=', isAdmin, 'isAuthor=', isAuthor);
       const res = isAdmin
         ? await softDeletePost(postId)
         : await deletePost(postId);
+      console.log('[PostDeleteButton] delete result:', res);
       if (res.ok) {
         toast.success('已删除');
         router.push('/feed');
         router.refresh();
       } else {
-        toast.error(res.error);
+        toast.error(res.error || '删除失败');
       }
     });
   };

@@ -156,10 +156,11 @@ export default async function PostDetailPage({
 
   const isViewerAuthor = user?.id === post.author_id;
 
-  // Check admin status
-  const { data: isAdmin } = user
-    ? await supabase.rpc('is_admin')
-    : { data: false };
+  // Check admin status — query profiles directly (more reliable than rpc in RSC)
+  const { data: viewerProfile } = user
+    ? await supabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle()
+    : { data: null };
+  const isAdmin = viewerProfile?.is_admin ?? false;
 
   const initials = (author.display_name ?? author.handle ?? '?').slice(0, 1);
 

@@ -122,8 +122,13 @@ export async function updatePost(
 
 export async function deletePost(id: string): Promise<ActionResult> {
   const supabase = createClient();
+  console.log('[posts] deletePost called for', id);
   const { error } = await supabase.rpc('delete_post', { post_id: id });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    console.error('[posts] delete_post RPC error:', error.code, error.message, error.details);
+    return { ok: false, error: error.message };
+  }
+  console.log('[posts] deletePost success for', id);
   revalidatePath('/feed');
   return { ok: true };
 }

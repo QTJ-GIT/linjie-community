@@ -64,8 +64,13 @@ export async function pinPost(
 
 export async function softDeletePost(postId: string): Promise<ActionResult> {
   const supabase = createClient();
+  console.log('[admin] softDeletePost called for', postId);
   const { error } = await supabase.rpc('delete_post', { post_id: postId });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    console.error('[admin] delete_post RPC error:', error.code, error.message, error.details);
+    return { ok: false, error: error.message };
+  }
+  console.log('[admin] softDeletePost success for', postId);
   revalidatePath('/admin/posts');
   revalidatePath('/feed');
   revalidatePath(`/posts/${postId}`);
