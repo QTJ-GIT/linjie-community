@@ -5,6 +5,7 @@ import { SITE } from '@/lib/site';
 import type { NewsItem } from '@/lib/news/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { GoldMarketPanel } from '@/components/gold/GoldMarketPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -149,6 +150,11 @@ export default async function NewsPage({
           <p className="mt-1 text-xs text-muted-foreground/70">尝试调整筛选条件或刷新页面</p>
         </div>
       )}
+
+      {/* 黄金资讯 */}
+      <section className="mt-10 border-t border-border/40 pt-8">
+        <GoldMarketPanel />
+      </section>
     </div>
   );
 }

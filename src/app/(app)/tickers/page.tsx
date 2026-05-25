@@ -4,7 +4,6 @@ import { LineChart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/server';
 import { cn } from '@/lib/utils';
-import { GoldMarketPanel } from '@/components/gold/GoldMarketPanel';
 import type { Ticker } from '@/types/domain';
 
 export const metadata: Metadata = {
@@ -118,10 +117,6 @@ export default async function TickersIndexPage() {
         </div>
       )}
 
-      {/* 黄金资讯 */}
-      <section className="mt-12 border-t border-border/40 pt-8">
-        <GoldMarketPanel />
-      </section>
     </div>
   );
 }
