@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 interface MarketData {
   price: number;
@@ -20,7 +19,6 @@ interface GoldApiResponse {
   cachedAt?: string;
 }
 
-// 硬编码财经新闻（与 gold_news_package 保持一致）
 const NEWS = [
   {
     id: 'intl_1',
@@ -128,16 +126,13 @@ function parseSinaResponse(text: string, key: string): MarketData | null {
   }
 }
 
-async function fetchWithTimeout(url: string, headers: Record<string, string>, timeoutMs: number): Promise<Response | null> {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    const res = await fetch(url, { headers, signal: controller.signal, next: { revalidate: 0 } });
-    clearTimeout(timeout);
-    return res;
-  } catch {
-    return null;
-  }
+function fetchWithTimeout(url: string, headers: Record<string, string>, timeoutMs: number): Promise<Response | null> {
+  return Promise.race([
+    fetch(url, { headers })
+      .then((res) => res)
+      .catch(() => null),
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+  ]);
 }
 
 async function fetchFromSina(): Promise<GoldApiResponse> {
@@ -147,12 +142,11 @@ async function fetchFromSina(): Promise<GoldApiResponse> {
   };
 
   try {
-    // 每个请求最多3秒，防止Vercel国外节点访问国内API超时
     const [goldRes, silverRes, dollarRes, oilRes] = await Promise.all([
-      fetchWithTimeout('https://hq.sinajs.cn/list=hf_GC', headers, 3000),
-      fetchWithTimeout('https://hq.sinajs.cn/list=hf_SI', headers, 3000),
-      fetchWithTimeout('https://hq.sinajs.cn/list=usdx', headers, 3000),
-      fetchWithTimeout('https://hq.sinajs.cn/list=hf_CL', headers, 3000),
+      fetchWithTimeout('https://hq.sinajs.cn/list=hf_GC', headers, 2500),
+      fetchWithTimeout('https://hq.sinajs.cn/list=hf_SI', headers, 2500),
+      fetchWithTimeout('https://hq.sinajs.cn/list=usdx', headers, 2500),
+      fetchWithTimeout('https://hq.sinajs.cn/list=hf_CL', headers, 2500),
     ]);
 
     const goldText = goldRes?.ok ? await goldRes.text() : '';
@@ -171,7 +165,7 @@ async function fetchFromSina(): Promise<GoldApiResponse> {
       return { gold, silver, dollarIndex, crudeOil, isRealtime: true };
     }
   } catch {
-    // Sina API failed, fall through to fallback
+    // Sina API failed
   }
 
   return getFallbackData();
