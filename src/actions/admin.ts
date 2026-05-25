@@ -2,7 +2,6 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/service';
 
 export type ActionResult<T = void> =
   | { ok: true; data?: T }
@@ -70,26 +69,16 @@ export async function softDeletePost(postId: string): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: '请先登录' };
 
-  const service = createServiceClient();
-
   // Verify caller is admin
-  const { data: profile } = await service
+  const { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   if (!profile?.is_admin) return { ok: false, error: '无权限' };
 
-  // Verify post exists
-  const { data: post } = await service
-    .from('posts')
-    .select('id')
-    .eq('id', postId)
-    .single();
-  if (!post) return { ok: false, error: '帖子不存在' };
-
-  // Soft-delete with audit (bypasses RLS via service role)
-  const { error } = await service
+  // Soft-delete with audit (RLS policy 0021 allows admins via WITH CHECK)
+  const { error } = await supabase
     .from('posts')
     .update({
       is_deleted: true,
@@ -116,26 +105,16 @@ export async function softDeleteComment(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: '请先登录' };
 
-  const service = createServiceClient();
-
   // Verify caller is admin
-  const { data: profile } = await service
+  const { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   if (!profile?.is_admin) return { ok: false, error: '无权限' };
 
-  // Verify comment exists
-  const { data: comment } = await service
-    .from('comments')
-    .select('id')
-    .eq('id', commentId)
-    .single();
-  if (!comment) return { ok: false, error: '评论不存在' };
-
-  // Soft-delete with audit (bypasses RLS via service role)
-  const { error } = await service
+  // Soft-delete with audit (RLS policy 0021 allows admins via WITH CHECK)
+  const { error } = await supabase
     .from('comments')
     .update({
       is_deleted: true,
@@ -176,18 +155,16 @@ export async function softDeleteUserContent(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: '请先登录' };
 
-  const service = createServiceClient();
-
   // Verify caller is admin
-  const { data: profile } = await service
+  const { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   if (!profile?.is_admin) return { ok: false, error: '无权限' };
 
   // Batch soft-delete posts
-  const { error: postsErr } = await service
+  const { error: postsErr } = await supabase
     .from('posts')
     .update({
       is_deleted: true,
@@ -201,7 +178,7 @@ export async function softDeleteUserContent(
   if (postsErr) return { ok: false, error: postsErr.message };
 
   // Batch soft-delete comments
-  const { error: commentsErr } = await service
+  const { error: commentsErr } = await supabase
     .from('comments')
     .update({
       is_deleted: true,

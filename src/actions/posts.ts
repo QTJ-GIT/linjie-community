@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/service';
 import {
   postCreateSchema,
   postUpdateSchema,
@@ -128,30 +127,28 @@ export async function deletePost(id: string): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: '请先登录' };
 
-  const service = createServiceClient();
-
-  // Get post author
-  const { data: post, error: postErr } = await service
+  // Verify post exists and get author
+  const { data: post, error: postErr } = await supabase
     .from('posts')
     .select('author_id')
     .eq('id', id)
     .single();
   if (postErr || !post) return { ok: false, error: '帖子不存在' };
 
-  // Check admin status (admins can also delete)
-  const { data: profile } = await service
+  // Check admin status (admins can also delete others' posts)
+  const { data: profile } = await supabase
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   const isAdmin = profile?.is_admin ?? false;
 
   if (user.id !== post.author_id && !isAdmin) {
     return { ok: false, error: '无权限' };
   }
 
-  // Soft-delete with audit (bypasses RLS via service role)
-  const { error } = await service
+  // Soft-delete with audit (RLS policy 0021 allows admins via WITH CHECK)
+  const { error } = await supabase
     .from('posts')
     .update({
       is_deleted: true,
