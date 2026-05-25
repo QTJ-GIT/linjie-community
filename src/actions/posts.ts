@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import {
   postCreateSchema,
   postUpdateSchema,
@@ -122,13 +123,45 @@ export async function updatePost(
 
 export async function deletePost(id: string): Promise<ActionResult> {
   const supabase = createClient();
-  console.log('[posts] deletePost called for', id);
-  const { error } = await supabase.rpc('delete_post', { post_id: id });
-  if (error) {
-    console.error('[posts] delete_post RPC error:', error.code, error.message, error.details);
-    return { ok: false, error: error.message };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: '请先登录' };
+
+  const service = createServiceClient();
+
+  // Get post author
+  const { data: post, error: postErr } = await service
+    .from('posts')
+    .select('author_id')
+    .eq('id', id)
+    .single();
+  if (postErr || !post) return { ok: false, error: '帖子不存在' };
+
+  // Check admin status (admins can also delete)
+  const { data: profile } = await service
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single();
+  const isAdmin = profile?.is_admin ?? false;
+
+  if (user.id !== post.author_id && !isAdmin) {
+    return { ok: false, error: '无权限' };
   }
-  console.log('[posts] deletePost success for', id);
+
+  // Soft-delete with audit (bypasses RLS via service role)
+  const { error } = await service
+    .from('posts')
+    .update({
+      is_deleted: true,
+      deleted_by: user.id,
+      deleted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id);
+
+  if (error) return { ok: false, error: error.message };
   revalidatePath('/feed');
   return { ok: true };
 }
