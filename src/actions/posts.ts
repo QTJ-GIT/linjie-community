@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import {
   postCreateSchema,
   postUpdateSchema,
@@ -127,28 +128,37 @@ export async function deletePost(id: string): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: '请先登录' };
 
+  console.log('[deletePost] user:', user.id, 'post:', id);
+
+  const service = createServiceClient();
+
   // Verify post exists and get author
-  const { data: post, error: postErr } = await supabase
+  const { data: post, error: postErr } = await service
     .from('posts')
     .select('author_id')
     .eq('id', id)
     .single();
-  if (postErr || !post) return { ok: false, error: '帖子不存在' };
+  if (postErr || !post) {
+    console.error('[deletePost] post not found:', postErr?.message);
+    return { ok: false, error: '帖子不存在' };
+  }
 
   // Check admin status (admins can also delete others' posts)
-  const { data: profile } = await supabase
+  const { data: profile } = await service
     .from('profiles')
     .select('is_admin')
     .eq('id', user.id)
-    .maybeSingle();
+    .single();
   const isAdmin = profile?.is_admin ?? false;
+
+  console.log('[deletePost] author:', post.author_id, 'isAdmin:', isAdmin);
 
   if (user.id !== post.author_id && !isAdmin) {
     return { ok: false, error: '无权限' };
   }
 
-  // Soft-delete with audit (RLS policy 0021 allows admins via WITH CHECK)
-  const { error } = await supabase
+  // Soft-delete with audit (Service Role bypasses RLS entirely)
+  const { error } = await service
     .from('posts')
     .update({
       is_deleted: true,
@@ -158,7 +168,12 @@ export async function deletePost(id: string): Promise<ActionResult> {
     })
     .eq('id', id);
 
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    console.error('[deletePost] update error:', error.message);
+    return { ok: false, error: error.message };
+  }
+
+  console.log('[deletePost] success');
   revalidatePath('/feed');
   return { ok: true };
 }
